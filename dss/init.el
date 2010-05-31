@@ -1,9 +1,11 @@
-;; TODO can't I put these somewhere else, env?
+;; can't I put these somewhere else, env?
 (push "~/bin" exec-path)
 (push "/opt/local/bin" exec-path)
 (push "/usr/local/share/emacs/site-lisp" load-path)
-;; TODO load everything in my dir
-(push "~/.emacs.d/dss/jabber" load-path)
+
+;; testing
+(setq x-select-enable-clipboard t)
+(setq vc-follow-symlinks nil)
 
 (menu-bar-mode -1)
 (when window-system
@@ -58,7 +60,7 @@
 (autoload 'ack-find-same-file "full-ack" nil t)
 (autoload 'ack-find-file "full-ack" nil t)
 
-;; Gnus
+;; gnus
 (setq mail-user-agent 'message-user-agent) 
 (setq user-mail-address "dss@orst.edu")
 (setq user-full-name "Darren Shepard")
@@ -68,19 +70,6 @@
 (setq mm-attachment-override-types '("image/.*"))
 (setq mm-discouraged-alternatives '("text/html" "text/richtext"))
 (setq gnus-ignored-newsgroups "") ;; show [Gmail]/* folders
-
-(require 'epa-file)
-(epa-file-enable)
-(setq epa-file-cache-passphrase-for-symmetric-encryption t)
-
-;; SMTP
-;; (setq smtpmail-starttls-credentials '(("smtp.gmail.com" 587 nil nil))
-;;       smtpmail-smtp-server "smtp.gmail.com"
-;;       smtpmail-default-smtp-server "smtp.gmail.com"
-;;       send-mail-function 'smtpmail-send-it
-;;       message-send-mail-function 'smtpmail-send-it
-;;       smtpmail-smtp-service 587
-;;       smtpmail-auth-credentials (expand-file-name "~/.authinfo"))
 
 ;; notmuch
 (require 'notmuch)
@@ -102,10 +91,19 @@
 
 (setq message-cite-function 'message-cite-original-without-signature)
 (setq message-kill-buffer-on-exit t)  ;; kill mail buffers after sending
-(setq message-default-mail-headers "Bcc: darren.shepard@gmail.com\n")
 (setq mail-header-separator "")
 
-;; Little brother database
+;; mutt specific
+(defun dss-message-mode-hook ()
+  (flush-lines "^Reply-To:")
+  (flush-lines "^\\(> \n\\)*> -- \n\\(\n?> .*\\)*")
+  (not-modified)
+  (message-goto-body))
+(or (assoc "mutt-" auto-mode-alist)
+    (setq auto-mode-alist (cons '("mutt-" . message-mode) auto-mode-alist)))
+(add-hook 'message-mode-hook 'dss-message-mode-hook)
+
+;; little brother db
 (autoload 'lbdb "lbdb" "Query the Little Brother's Database" t)
 (autoload 'lbdb-region "lbdb" "Query the Little Brother's Database" t)
 (autoload 'lbdb-maybe-region "lbdb" "Query the Little Brother's Database" t)
@@ -114,26 +112,26 @@
 (setq erc-fill-column 68)
 (add-hook 'erc-mode-hook 'erc-add-scroll-to-bottom)
 
-;; Jabber
-(require 'jabber-autoloads)
-(setq jabber-account-list
-      '(("darrenshepard@chat.facebook.com")
-        ("darren.shepard@gmail.com"
-         (:network-server . "talk.google.com")
-         (:connection-type . ssl))))
-(setq jabber-vcard-avatars-retrieve nil)
-(setq jabber-roster-show-bindings nil)
-(setq jabber-activity-make-strings 'jabber-activity-make-strings-shorten)
-(setq jabber-alert-presence-hooks nil)
-(setq jabber-alert-muc-hooks nil)
-(add-hook 'jabber-chat-mode-hook 'flyspell-mode)
-(add-hook 'jabber-post-connect-hook 'jabber-autoaway-start)
-(add-hook 'jabber-mode-hook 'erc-add-scroll-to-bottom)
-
-;; Do this last since pc-select changes region color
+;; do this last since pc-select changes region color
 (require 'color-theme)
 (load-file "~/.emacs.d/dss/twilight.el")
 (color-theme-twilight)
 
 (require 'browse-kill-ring)
 (browse-kill-ring-default-keybindings)
+
+;; android debug
+(custom-set-variables
+ '(gud-jdb-use-classpath t)
+ '(gud-jdb-classpath "~/src/helloandroid/src:~/src/helloandroid/bin/classes")
+ '(gud-jdb-sourcepath "~/src/helloandroid/src"))
+
+;; force compile buffer to scroll
+(defadvice compile-internal (after my-scroll act comp)
+  "Forces compile buffer to scroll. See around line 363 in compile.el"
+  (let* ((ob (current-buffer)))
+    (save-excursion
+      (select-window (get-buffer-window ad-return-value))
+      (goto-char (point-max))
+      (select-window (get-buffer-window ob)))))
+(setq compilation-scroll-output t)
