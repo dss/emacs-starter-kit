@@ -1,13 +1,14 @@
-;; can't I put these somewhere else, env?
-(push "~/bin" exec-path)
+;; keys
+(global-set-key (kbd "C-w") 'backward-kill-word)
+(global-set-key (kbd "C-c k") 'comment-region)
+(global-set-key (kbd "C-c u") 'uncomment-region)
+(global-set-key (kbd "C-c c") 'calc)
+
 (push "/opt/local/bin" exec-path)
-(push "/usr/local/share/emacs/site-lisp" load-path)
 
-;; testing
-(setq x-select-enable-clipboard t)
-(setq vc-follow-symlinks nil)
-(setq epa-file-cache-passphrase-for-symmetric-encryption t)
+(setq default-tab-width 4)
 
+;; gui mode
 (menu-bar-mode -1)
 (when window-system
   (scroll-bar-mode -1)
@@ -15,11 +16,11 @@
   (setq visible-bell nil)
   (transient-mark-mode t)
   (pc-selection-mode t)
-  (server-start)
+;;  (server-start)
   (when (eq system-type 'darwin)
     (menu-bar-mode t)
-    (defconst font
-      "-apple-Terminus-medium-normal-normal-*-12-*-*-*-m-0-iso10646-1")
+;;    (defconst font "-apple-Terminus-medium-normal-normal-*-14-*-*-*-m-0-iso10646-1")
+    (defconst font "-apple-Meslo_LG_S_DZ-medium-normal-normal-*-13-*-*-*-m-0-iso10646-1")
     (set-default-font font)
     (add-to-list 'default-frame-alist (cons 'font font))
     (setq browse-url-browser-function 'browse-url-default-macosx-browser)
@@ -40,14 +41,17 @@
     (set-default-font font)
     (add-to-list 'default-frame-alist (cons 'font font))))
 
-(global-set-key (kbd "C-w") 'backward-kill-word)
-(global-set-key (kbd "C-c c") 'calc)
-(global-set-key (kbd "C-c g") 'gnus)
-(global-set-key (kbd "C-c k") 'comment-region)
-(global-set-key (kbd "C-c u") 'uncomment-region)
-(global-set-key (kbd "C-c n") 'notmuch-folder)
-(global-set-key (kbd "C-c m") 'notmuch-mua-mail)
+;; force compile buffer to scroll
+(defadvice compile-internal (after my-scroll act comp)
+  "Forces compile buffer to scroll. See around line 363 in compile.el"
+  (let* ((ob (current-buffer)))
+    (save-excursion
+      (select-window (get-buffer-window ad-return-value))
+      (goto-char (point-max))
+      (select-window (get-buffer-window ob)))))
+(setq compilation-scroll-output t)
 
+;; make up/down work in *shell*
 (add-hook 'shell-mode-hook 'n-shell-mode-hook)
 (defun n-shell-mode-hook ()
   "12Jan2002 - sailor, shell mode customizations."
@@ -55,45 +59,7 @@
   (local-set-key '[down] 'comint-next-input)
   (local-set-key '[(shift tab)] 'comint-next-matching-input-from-input))
 
-;; ack (grep replacement)
-(load-file "~/.emacs.d/dss/full-ack.el")
-(autoload 'ack-same "full-ack" nil t)
-(autoload 'ack "full-ack" nil t)
-(autoload 'ack-find-same-file "full-ack" nil t)
-(autoload 'ack-find-file "full-ack" nil t)
-
-;; gnus
-(setq mail-user-agent 'message-user-agent) 
-(setq user-mail-address "dss@orst.edu")
-(setq user-full-name "Darren Shepard")
-(setq gnus-select-method '(nntp "news.gmane.org"))
-(setq gnus-secondary-select-method '(nnimap "localhost"
-                                            (nnimap-address "localhost")))
-
-(add-hook 'gnus-topic-mode-hook 'gnus-topic-mode)
-(setq mm-attachment-override-types '("image/.*"))
-(setq mm-discouraged-alternatives '("text/html" "text/richtext"))
-(setq gnus-ignored-newsgroups "") ;; show [Gmail]/* folders
-(setq gnus-large-newsgroup 'nil)
-
-;; notmuch
-(require 'notmuch)
-(setq notmuch-folders '(("inbox"    . "tag:inbox and not tag:delete")
-                        ("starred"  . "tag:starred and not tag:delete")
-                        ("sent"     . "tag:sent and not tag:delete")
-                        ("spam"     . "tag:spam and not tag:delete")
-                        ("trash"    . "tag:delete")
-                        ("blowfish" . "tag:blowfish and not tag:delete")
-                        ("bulk"     . "tag:bulk and not tag:delete")
-                        ("notmuch"  . "tag:notmuch and not tag:delete")))
-(setq notmuch-search-oldest-first nil)
-(define-key notmuch-folder-mode-map "j" 'notmuch-folder-next)
-(define-key notmuch-folder-mode-map "k" 'notmuch-folder-previous)
-(define-key notmuch-search-mode-map "j" 'notmuch-search-next-thread)
-(define-key notmuch-search-mode-map "k" 'notmuch-search-previous-thread)
-(define-key notmuch-show-mode-map "j" 'notmuch-show-next-message)
-(define-key notmuch-show-mode-map "k" 'notmuch-show-previous-message)
-
+;; mail-related
 (setq message-cite-function 'message-cite-original-without-signature)
 (setq message-kill-buffer-on-exit t)  ;; kill mail buffers after sending
 (setq mail-header-separator "")
@@ -113,30 +79,30 @@
 (autoload 'lbdb-region "lbdb" "Query the Little Brother's Database" t)
 (autoload 'lbdb-maybe-region "lbdb" "Query the Little Brother's Database" t)
 
-;; erc
-(setq erc-fill-column 72)
-(add-hook 'erc-mode-hook 'erc-add-scroll-to-bottom)
+;; golang
+(add-to-list 'load-path "~/tools/go/misc/emacs" t)
+(require 'go-mode-load)
+
+;; org-mode
+(setq org-agenda-files (list "~/Documents/notes.org"
+                             "~/Documents/obvi.org"))
+
+;; ack (grep replacement)
+(load-file "~/.emacs.d/dss/full-ack.el")
+(autoload 'ack-same "full-ack" nil t)
+(autoload 'ack "full-ack" nil t)
+(autoload 'ack-find-same-file "full-ack" nil t)
+(autoload 'ack-find-file "full-ack" nil t)
+
+(require 'parenface)
+
+(require 'browse-kill-ring)
+(browse-kill-ring-default-keybindings)
+(setq browse-kill-ring-resize-window t)
+
+(require 'php-mode)
 
 ;; do this last since pc-select changes region color
 (require 'color-theme)
 (load-file "~/.emacs.d/dss/twilight.el")
 (color-theme-twilight)
-
-(require 'browse-kill-ring)
-(browse-kill-ring-default-keybindings)
-
-;; android debug
-(custom-set-variables
- '(gud-jdb-use-classpath t)
- '(gud-jdb-classpath "~/src/helloandroid/src:~/src/helloandroid/bin/classes")
- '(gud-jdb-sourcepath "~/src/helloandroid/src"))
-
-;; force compile buffer to scroll
-(defadvice compile-internal (after my-scroll act comp)
-  "Forces compile buffer to scroll. See around line 363 in compile.el"
-  (let* ((ob (current-buffer)))
-    (save-excursion
-      (select-window (get-buffer-window ad-return-value))
-      (goto-char (point-max))
-      (select-window (get-buffer-window ob)))))
-(setq compilation-scroll-output t)
