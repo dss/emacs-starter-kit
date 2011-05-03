@@ -3,8 +3,8 @@
 (global-set-key (kbd "C-c k") 'comment-region)
 (global-set-key (kbd "C-c u") 'uncomment-region)
 (global-set-key (kbd "C-c c") 'calc)
-
-(push "/opt/local/bin" exec-path)
+(global-set-key (kbd "C-x g") 'ack)
+(global-set-key [f7] 'compile)
 
 (setq default-tab-width 4)
 
@@ -19,7 +19,6 @@
 ;;  (server-start)
   (when (eq system-type 'darwin)
     (menu-bar-mode t)
-;;    (defconst font "-apple-Terminus-medium-normal-normal-*-14-*-*-*-m-0-iso10646-1")
     (defconst font "-apple-Meslo_LG_S_DZ-medium-normal-normal-*-13-*-*-*-m-0-iso10646-1")
     (set-default-font font)
     (add-to-list 'default-frame-alist (cons 'font font))
@@ -83,10 +82,6 @@
 (add-to-list 'load-path "~/tools/go/misc/emacs" t)
 (require 'go-mode-load)
 
-;; org-mode
-(setq org-agenda-files (list "~/Documents/notes.org"
-                             "~/Documents/obvi.org"))
-
 ;; ack (grep replacement)
 (load-file "~/.emacs.d/dss/full-ack.el")
 (autoload 'ack-same "full-ack" nil t)
@@ -101,8 +96,40 @@
 (setq browse-kill-ring-resize-window t)
 
 (require 'php-mode)
+(add-to-list 'auto-mode-alist '("Makefile.inc" . makefile-mode))
 
-;; do this last since pc-select changes region color
-(require 'color-theme)
-(load-file "~/.emacs.d/dss/twilight.el")
-(color-theme-twilight)
+(add-hook 'c-mode-common-hook '(lambda () (c-toggle-auto-state 1)))
+(setq-default c-indent-tabs-mode t    
+              c-indent-level 4        
+              c-argdecl-indent 0      
+              c-tab-always-indent t
+              backward-delete-function nil) 
+(c-add-style "my-c-style" '((c-continued-statement-offset 4)))
+
+(defun my-c-mode-hook ()
+  (c-set-style "my-c-style")
+  (c-set-offset 'substatement-open '0) 
+  (c-set-offset 'inline-open '+)
+  (c-set-offset 'block-open '+)
+  (c-set-offset 'brace-list-open '+)   
+  (c-set-offset 'case-label '+))       
+(add-hook 'c-mode-hook 'my-c-mode-hook)
+(add-hook 'c++-mode-hook 'my-c-mode-hook)
+
+(require 'browse-kill-ring)
+(browse-kill-ring-default-keybindings)
+
+;; ;; do this last since pc-select changes region color
+;; (require 'color-theme)
+;; (load-file "~/.emacs.d/dss/twilight.el")
+;; (color-theme-twilight)
+
+;; ;; change magit diff colors
+;; (eval-after-load 'magit
+;;   '(progn
+;;      (set-face-foreground 'magit-diff-add "green3")
+;;      (set-face-foreground 'magit-diff-del "red3")
+;;      (when (not window-system)
+;;        (set-face-background 'magit-item-highlight "#27292A"))))
+
+
