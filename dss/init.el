@@ -3,8 +3,10 @@
 (global-set-key (kbd "C-c k") 'comment-region)
 (global-set-key (kbd "C-c u") 'uncomment-region)
 (global-set-key (kbd "C-c c") 'calc)
+(global-set-key (kbd "C-c g") 'magit-status)
 (global-set-key (kbd "C-x g") 'ack)
-(global-set-key [f7] 'compile)
+(global-set-key (kbd "C-d") 'scroll-down)
+(global-set-key (kbd "C-u") 'scroll-up)
 
 (setq default-tab-width 4)
 
@@ -98,7 +100,6 @@
 (require 'php-mode)
 (add-to-list 'auto-mode-alist '("Makefile.inc" . makefile-mode))
 
-(add-hook 'c-mode-common-hook '(lambda () (c-toggle-auto-state 1)))
 (setq-default c-indent-tabs-mode t    
               c-indent-level 4        
               c-argdecl-indent 0      
@@ -112,24 +113,75 @@
   (c-set-offset 'inline-open '+)
   (c-set-offset 'block-open '+)
   (c-set-offset 'brace-list-open '+)   
-  (c-set-offset 'case-label '+))       
+  (c-set-offset 'case-label '+)
+  (c-set-offset 'statement 'c-lineup-runin-statements))
 (add-hook 'c-mode-hook 'my-c-mode-hook)
 (add-hook 'c++-mode-hook 'my-c-mode-hook)
+
+(defun lconfig-c-mode ()
+  (progn (define-key c-mode-base-map "\C-m" 'newline-and-indent)
+         (define-key c-mode-base-map [f5] 'next-error)
+         (define-key c-mode-base-map [f6] 'compile)
+         (define-key c-mode-base-map (kbd "C-]") 'find-tag-other-window)
+         (define-key c-mode-base-map (kbd "C-t") 'pop-tag-mark)
+         ))
+(add-hook 'c-mode-common-hook 'lconfig-c-mode)
 
 (require 'browse-kill-ring)
 (browse-kill-ring-default-keybindings)
 
-;; ;; do this last since pc-select changes region color
-;; (require 'color-theme)
-;; (load-file "~/.emacs.d/dss/twilight.el")
-;; (color-theme-twilight)
+;; do this last since pc-select changes region color
+(require 'color-theme)
+(load-file "~/.emacs.d/dss/twilight.el")
+(color-theme-twilight)
 
-;; ;; change magit diff colors
-;; (eval-after-load 'magit
-;;   '(progn
-;;      (set-face-foreground 'magit-diff-add "green3")
-;;      (set-face-foreground 'magit-diff-del "red3")
-;;      (when (not window-system)
-;;        (set-face-background 'magit-item-highlight "#27292A"))))
+;; change magit diff colors
+(eval-after-load 'magit
+  '(progn
+     (set-face-foreground 'magit-diff-add "green3")
+     (set-face-foreground 'magit-diff-del "red3")
+     (when (not window-system)
+       (set-face-background 'magit-item-highlight "#27292A"))))
 
+;(require 'show-wspace)
+;(add-hook 'c-mode-common-hook 'show-ws-highlight-tabs)
 
+(defun unhtml (start end)
+  (interactive "r")
+  (save-excursion
+    (save-restriction
+      (narrow-to-region start end)
+      (goto-char (point-min))
+      (replace-string "&" "&amp;")
+      (goto-char (point-min))
+      (replace-string "<" "&lt;")
+      (goto-char (point-min))
+      (replace-string ">" "&gt;"))))
+
+(defun split-into-three-horizontally-and-follow ()
+  "Splits current window into 4 windows horizontally and switchs to follow-mode"
+  (interactive)
+  (delete-other-windows)
+  (split-window-horizontally)
+  (split-window-horizontally)
+  (balance-windows)
+  (follow-mode 1)
+  ;; Turn on line highlighting to make it easier to
+  ;; track cursor
+  (hl-line-mode 1))
+
+(defun split-into-four-horizontally-and-follow ()
+  "Splits current window into 4 windows horizontally and switchs to follow-mode"
+  (interactive)
+  (delete-other-windows)
+  (split-window-horizontally)
+  (split-window-horizontally)
+  (split-window-horizontally)
+  (balance-windows)
+  (follow-mode 1)
+  ;; Turn on line highlighting to make it easier to
+  ;; track cursor
+  (hl-line-mode 1))
+
+(global-set-key (kbd "C-x 8") 'split-into-three-horizontally-and-follow)
+(global-set-key (kbd "C-x 9") 'split-into-four-horizontally-and-follow)
