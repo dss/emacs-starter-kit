@@ -29,7 +29,7 @@
 ;;  (server-start)
   (when (eq system-type 'darwin)
     (menu-bar-mode t)
-    (defconst font "-apple-Meslo_LG_S_DZ-medium-normal-normal-*-13-*-*-*-m-0-iso10646-1")
+    (defconst font "-apple-Meslo_LG_S_DZ-medium-normal-normal-*-12-*-*-*-m-0-iso10646-1")
     (set-default-font font)
     (add-to-list 'default-frame-alist (cons 'font font))
     (setq browse-url-browser-function 'browse-url-default-macosx-browser)
