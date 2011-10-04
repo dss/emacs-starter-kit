@@ -38,6 +38,7 @@
       (ns-do-applescript "tell application \"Emacs\" to activate"))
     ;; (add-hook 'server-visit-hook 'ns-raise-emacs)
     (set-frame-parameter nil 'fullscreen 'fullboth)
+    (global-set-key (kbd "s-f") 'ns-toggle-fullscreen)
     )
   (when (eq system-type 'gnu/linux)
     (defconst font "-xos4-terminus-medium-r-normal--12-*-72-72-c-60-iso8859-1")
