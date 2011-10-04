@@ -3,12 +3,20 @@
 (global-set-key (kbd "C-c k") 'comment-region)
 (global-set-key (kbd "C-c u") 'uncomment-region)
 (global-set-key (kbd "C-c c") 'calc)
-(global-set-key (kbd "C-c g") 'magit-status)
+(global-set-key (kbd "C-c g") 'ack)
 (global-set-key (kbd "C-x g") 'ack)
-(global-set-key (kbd "C-d") 'scroll-down)
-(global-set-key (kbd "C-u") 'scroll-up)
+
+(global-set-key (kbd "s-0") 'delete-window)
+(global-set-key (kbd "s-1") 'delete-other-windows)
+(global-set-key (kbd "s-2") 'split-window-vertically)
+(global-set-key (kbd "s-3") 'split-window-horizontally)
+(global-set-key (kbd "s-o") 'other-window)
+(global-set-key (kbd "s-k") 'kill-buffer)
+(global-set-key (kbd "s-g") 'magit-status)
 
 (setq default-tab-width 4)
+
+(load-file "dss.el")
 
 ;; gui mode
 (menu-bar-mode -1)
@@ -32,8 +40,8 @@
     (set-frame-parameter nil 'fullscreen 'fullboth)
     )
   (when (eq system-type 'gnu/linux)
-    (defconst font
-      "-xos4-terminus-medium-r-normal--12-*-72-72-c-60-iso8859-1")
+    (defconst font "-xos4-terminus-medium-r-normal--12-*-72-72-c-60-iso8859-1")
+    ;(defconst font "-bitstream-Meslo LG S DZ-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1")
     (set-default-font font)
     (add-to-list 'default-frame-alist (cons 'font font)))
   (when (eq system-type 'windows-nt)
@@ -81,8 +89,8 @@
 (autoload 'lbdb-maybe-region "lbdb" "Query the Little Brother's Database" t)
 
 ;; golang
-(add-to-list 'load-path "~/tools/go/misc/emacs" t)
-(require 'go-mode-load)
+;(add-to-list 'load-path "~/tools/go/misc/emacs" t)
+;(require 'go-mode-load)
 
 ;; ack (grep replacement)
 (load-file "~/.emacs.d/dss/full-ack.el")
@@ -90,6 +98,7 @@
 (autoload 'ack "full-ack" nil t)
 (autoload 'ack-find-same-file "full-ack" nil t)
 (autoload 'ack-find-file "full-ack" nil t)
+(setq ack-prompt-for-directory t)
 
 (require 'parenface)
 
@@ -100,19 +109,19 @@
 (require 'php-mode)
 (add-to-list 'auto-mode-alist '("Makefile.inc" . makefile-mode))
 
-(setq-default c-indent-tabs-mode t    
-              c-indent-level 4        
-              c-argdecl-indent 0      
+(setq-default c-indent-tabs-mode t
+              c-indent-level 4
+              c-argdecl-indent 0
               c-tab-always-indent t
-              backward-delete-function nil) 
+              backward-delete-function nil)
 (c-add-style "my-c-style" '((c-continued-statement-offset 4)))
 
 (defun my-c-mode-hook ()
   (c-set-style "my-c-style")
-  (c-set-offset 'substatement-open '0) 
+  (c-set-offset 'substatement-open '0)
   (c-set-offset 'inline-open '+)
   (c-set-offset 'block-open '+)
-  (c-set-offset 'brace-list-open '+)   
+  (c-set-offset 'brace-list-open '+)
   (c-set-offset 'case-label '+)
   (c-set-offset 'statement 'c-lineup-runin-statements))
 (add-hook 'c-mode-hook 'my-c-mode-hook)
@@ -145,6 +154,8 @@
 
 ;(require 'show-wspace)
 ;(add-hook 'c-mode-common-hook 'show-ws-highlight-tabs)
+
+(hl-line-mode 1)
 
 (defun unhtml (start end)
   (interactive "r")
@@ -185,3 +196,5 @@
 
 (global-set-key (kbd "C-x 8") 'split-into-three-horizontally-and-follow)
 (global-set-key (kbd "C-x 9") 'split-into-four-horizontally-and-follow)
+
+(require 'yasnippet-bundle)
