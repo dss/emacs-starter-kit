@@ -16,7 +16,7 @@
 
 (setq default-tab-width 4)
 
-(load-file "dss.el")
+(load-file "~/.emacs.d/dss/dss.el")
 
 ;; gui mode
 (menu-bar-mode -1)
